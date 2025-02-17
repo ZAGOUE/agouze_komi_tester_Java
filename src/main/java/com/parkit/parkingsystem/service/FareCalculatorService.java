@@ -8,14 +8,16 @@ public void calculateFare(Ticket ticket) {
     calculateFare(ticket, false);
 }
     public void calculateFare(Ticket ticket, boolean discount){
-        if( (ticket.getOutTime() == null) || (ticket.getOutTime().before(ticket.getInTime())) ){
+        if (ticket.getInTime() == null || ticket.getOutTime() == null) {
+            throw new IllegalArgumentException("In or Out time is missing");
+        }
+    if(ticket.getOutTime().before(ticket.getInTime()) ){
             throw new IllegalArgumentException("Out time provided is incorrect:"+ticket.getOutTime().toString());
         }
 
         long intTimeMillis  = ticket.getInTime().getTime();
         long outTimeMillis = ticket.getOutTime().getTime();
 
-        //TODO: Some tests are failing here. Need to check if this logic is correct
         long durationInMillis  = outTimeMillis - intTimeMillis;
         //Conversion to hour
         double durationInHours = (double) durationInMillis / (60 * 60 * 1000);
@@ -37,6 +39,7 @@ public void calculateFare(Ticket ticket) {
             }
             default: throw new IllegalArgumentException("Unknown Parking Type");
         }
+
         // reduction of 5%
         if (discount) {
             double Fare = 0;
