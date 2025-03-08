@@ -42,9 +42,7 @@ public void calculateFare(Ticket ticket) {
 
         // reduction of 5%
         if (discount) {
-            double Fare = 0;
-            Fare += ticket.getPrice();
-            ticket.setPrice(Fare * 0.95);
-        }
+            ticket.setPrice(ticket.getPrice() * 0.95);
+        } else ticket.setPrice(ticket.getPrice());
     }
 }

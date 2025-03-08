@@ -153,7 +153,7 @@ public class ParkingServiceTest {
 
         parkingService.processIncomingVehicle();
 
-        // Vérifier que le ticket N'EST PAS enregistré car pas de place dispo
+        // Vérifier que le ticket N'EST PAS enregistré, pas de place disponible
         verify(ticketDAO, never()).saveTicket(any());
     }
 
@@ -207,6 +207,28 @@ public class ParkingServiceTest {
         parkingService.processIncomingVehicle();
 
         verify(ticketDAO).saveTicket(any());
+    }
+    @Test
+    public void testProcessExitingVehicleThrowsException() throws Exception {
+        when(inputReaderUtil.readVehicleRegistrationNumber()).thenThrow(new RuntimeException("Erreur de saisie"));
+        assertDoesNotThrow(() -> parkingService.processExitingVehicle());
+        verify(ticketDAO, never()).updateTicket(any());
+    }
+    @Test
+    public void testProcessExitingVehicleWithShortParkingTime() throws Exception {
+        Ticket ticket = new Ticket();
+        ticket.setParkingSpot(new ParkingSpot(1, ParkingType.CAR, false));
+        ticket.setInTime(new Date(System.currentTimeMillis() - (15 * 60 * 1000))); // 15 min
+        ticket.setOutTime(new Date());
+        ticket.setVehicleRegNumber(vehicleRegNumber);
+
+        when(ticketDAO.getTicket(vehicleRegNumber)).thenReturn(ticket);
+        when(ticketDAO.updateTicket(ticket)).thenReturn(true);
+        when(inputReaderUtil.readVehicleRegistrationNumber()).thenReturn(vehicleRegNumber);
+
+        parkingService.processExitingVehicle();
+
+        assertEquals(0, ticket.getPrice(), "Le prix doit être nul pour un stationnement de moins de 30 min");
     }
 
 }
